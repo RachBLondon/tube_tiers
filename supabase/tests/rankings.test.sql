@@ -1,6 +1,8 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(18);
+-- Isolate fixtures from local manual testing; rollback restores existing votes.
+delete from public.submissions;
 insert into auth.users(id) values('00000000-0000-0000-0000-000000000101'),('00000000-0000-0000-0000-000000000102');
 create temporary table fixture as select jsonb_object_agg(key,'A*'::text) as rankings from unnest(array['bakerloo','central','circle','district','elizabeth','hammersmith-city','jubilee','metropolitan','northern','piccadilly','victoria','waterloo-city','overground','dlr','trams','thameslink','cable-car','uber-boat','heathrow-express']) as key;
 grant select on fixture to anon,authenticated;

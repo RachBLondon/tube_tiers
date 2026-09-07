@@ -76,8 +76,13 @@ The optional `stage_tube_ranking` WebMCP tool stages a complete visible draft in
 
 ## Submission limit
 
-A maximum of 1,000 current submissions is enforced by `submit_ranking()` in Postgres. Its transaction lock serializes the capacity check and insert, including simultaneous final-slot attempts. Existing voters can update at capacity, subject to the usual 30-second cooldown. Removing a vote administratively frees a slot.
+A maximum of 10,000 current submissions is enforced by `submit_ranking()` in Postgres. Its transaction lock serializes the capacity check and insert, including simultaneous final-slot attempts. Existing voters can update at capacity, subject to the usual 30-second cooldown. Removing a vote administratively frees a slot.
 
 When full, the app checks capacity before creating a new anonymous identity. Direct calls to Supabase Auth can still create identities; this is a stored-vote limit, not a signup, request, or spending cap. Enable CAPTCHA and review Supabase billing cost controls for that separate concern.
 
 Run `python3 tests/submission-cap-concurrency.py` with local Supabase running to verify two requests competing for the final slot. The test uses an isolated schema and removes its own fixtures afterward.
+
+### Community result caching
+Only the public community aggregate is cached for 60 seconds using the Next data cache. Count and averages come from one database snapshot. The next visit after expiry triggers background refresh; this is not a strict 60-second freshness guarantee. Failed reads throw inside the cache so an error is never stored as an empty board; an existing good result can remain visible during a database outage. Submissions, individual rankings, authentication and capacity checks stay uncached. Saves deliberately do not invalidate the homepage cache.
+
+The 10,000 limit requires migration `20260907223317_raise_submission_limit_to_10000.sql` as well as the app deployment. Local testing uses `supabase migration up --local`; do not apply remotely until the release is approved.

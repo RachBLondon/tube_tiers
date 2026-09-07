@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { LINES, TIERS, isTier, type Rankings, type Tier } from '@/core/rankings';
 import { LineChip } from './line-chip';
+import { ShareRankingButton } from './share-ranking';
+import { LAST_RANKING_KEY, LastRankingLink } from './last-ranking-link';
+import type { ShareRanking } from '@/core/share-image';
 import { Captcha } from './captcha';
 type Props={connected:boolean;submitAction:(input:unknown)=>Promise<{id?:string;error?:string}>};
 const DRAFT_KEY='tube-tiers:draft:v1';
@@ -17,6 +20,7 @@ export function RankingEditor({connected,submitAction}:Props){
   const [error,setError]=useState('');
   const [announcement,setAnnouncement]=useState('');
   const [saved,setSaved]=useState('');
+  const [savedRanking,setSavedRanking]=useState<ShareRanking|null>(null);
   const [captchaToken,setCaptchaToken]=useState('');
   const [captchaKey,setCaptchaKey]=useState(0);
   const [pending,startTransition]=useTransition();
@@ -103,7 +107,7 @@ export function RankingEditor({connected,submitAction}:Props){
     if(pending)return;
     setError('');
     startTransition(async()=>{
-      try{const result=await submitAction({username,rankings,captchaToken});if(result.error)setError(result.error);else if(result.id){setSaved(signature);setAnnouncement('Your ranking has been submitted. Thank you!');}}
+      try{const result=await submitAction({username,rankings,captchaToken});if(result.error)setError(result.error);else if(result.id){setSaved(signature);setSavedRanking({id:result.id,username:username.trim(),rankings:{...rankings}});try{localStorage.setItem(LAST_RANKING_KEY,result.id);}catch{/* Saving succeeded even if remembering the link fails. */}setAnnouncement('Your ranking has been submitted. Thank you!');}}
       catch{setError('Something interrupted your submission. Please try again.');}
       finally{setCaptchaToken('');setCaptchaKey(value=>value+1);}
     });
@@ -115,7 +119,7 @@ export function RankingEditor({connected,submitAction}:Props){
     try{void Promise.resolve(context.registerTool({name:'stage_tube_ranking',description:'Set all 19 service tiers and a name in the visible draft. Does not submit a vote. Review and use the Submit ranking button to publish.',inputSchema:{type:'object',properties:{username:{type:'string',minLength:2,maxLength:40},rankings:{type:'object',properties:Object.fromEntries(LINES.map(line=>[line.id,{type:'string',enum:TIERS}])),required:LINES.map(line=>line.id),additionalProperties:false}},required:['username','rankings'],additionalProperties:false},annotations:{readOnlyHint:false},async execute(input:unknown){const {validateSubmission}=await import('@/core/rankings');const valid=input && typeof input==='object' && 'username' in input && 'rankings' in input ? validateSubmission(input.username,input.rankings) : null;if(!valid)throw new Error('A valid name and all 19 tiers are required.');if(!ready || pending)throw new Error('Please wait until the editor is ready.');setRankings(valid.rankings);setUsername(valid.username);setSelected(null);await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));return {status:'draft',lines:19,submitted:false};}},{signal:lifecycle.signal})).catch(()=>{});}catch{/* Optional browser capability; the regular editor remains available. */}
     return()=>lifecycle.abort();
   },[ready,pending]);
-  return <><div className="editor-toolbar"><span className="small-note">{ready?`${count} of ${LINES.length} services ranked`:'Loading your draft…'} · {storageAvailable?'Draft saved on this device':'Draft lasts while this page stays open'}</span><button type="button" className="text-button" disabled={pending||!count} onClick={()=>{if(window.confirm('Clear the tiers in your draft? This does not delete your submitted ranking.')){setRankings({});setSelected(null);setError('');}}}>Reset draft</button></div>
+  return <><LastRankingLink/><div className="editor-toolbar"><span className="small-note">{ready?`${count} of ${LINES.length} services ranked`:'Loading your draft…'} · {storageAvailable?'Draft saved on this device':'Draft lasts while this page stays open'}</span><button type="button" className="text-button" disabled={pending||!count} onClick={()=>{if(window.confirm('Clear the tiers in your draft? This does not delete your submitted ranking.')){setRankings({});setSelected(null);setError('');}}}>Reset draft</button></div>
     {!connected && <div className="notice">The board is ready to try. Submitting opens when the database is connected.</div>}
     <p className="sr-only" id="drag-instructions">Drag a service straight into a tier. With a keyboard, focus a service and use the up and down arrow keys to change its tier. Press Delete to return it to unranked.</p>
     <div className="editor-layout"><div className="tier-board editor">{TIERS.map((tier,index)=><div className={`tier-row${over===tier?' dropping':''}`} key={tier} data-tier-drop={tier}><div className={`tier-label tier-${index}`}><strong>{tier}</strong></div><div className="tier-content">{LINES.filter(line=>rankings[line.id]===tier).map(chip)}</div></div>)}</div><aside className={`pool${over==='unranked'?' dropping':''}`} data-tier-drop="unranked"><h3>Drag these into your tier list <span className="count">{LINES.length-count} left</span></h3><div className="pool-lines">{LINES.filter(line=>!rankings[line.id]).map(chip)}</div>{count===LINES.length&&<p>All ranked. Add your name and submit below.</p>}</aside></div>
@@ -124,6 +128,7 @@ export function RankingEditor({connected,submitAction}:Props){
     {count<LINES.length && <p className="privacy-note">Rank the remaining {LINES.length-count} {LINES.length-count===1?'service':'services'} to submit.</p>}
     <div className="sr-only" role="status" aria-live="polite">{announcement}</div>
     {error&&<div className="notice error" role="alert" style={{marginTop:20}}>{error}</div>}
+    {savedRanking && <div className="share-success"><ShareRankingButton ranking={savedRanking}/><p className="privacy-note">Share your last submitted ranking. Unsubmitted edits aren’t included.</p></div>}
     {saved===signature && <div className="notice" style={{marginTop:20}}>Your opinion is on the board. <Link href="/" style={{textDecoration:'underline'}}>See the community verdict →</Link> or <Link href="/submissions" style={{textDecoration:'underline'}}>browse everyone’s lists</Link>.</div>}
   </>;
 }

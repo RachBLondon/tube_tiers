@@ -8,6 +8,6 @@ export async function submitRanking(input:unknown) {
   if(!parsed)return {error:'Rank every service and use a name of 2–40 characters (letters, numbers, spaces or simple punctuation).'};
   const captchaToken='captchaToken' in input && typeof input.captchaToken==='string' && input.captchaToken.length<=4096 ? input.captchaToken : undefined;
   const result=await saveRanking(parsed.username,parsed.rankings,captchaToken);
-  if(result.id){revalidatePath('/');revalidatePath('/submissions');}
+  if(result.id){revalidatePath('/submissions');}
   return result;
 }
