@@ -1,0 +1,5 @@
+import { LINES, TIERS, type Rankings, type Average, scoreToTier } from '@/core/rankings';
+import { LineChip } from './line-chip';
+export function TierBoard({rankings, averages, empty = 'No lines in this tier'}: {rankings?: Rankings; averages?: Average[]; empty?: string}) {
+ return <div className="tier-board">{TIERS.map((tier,index) => { const lines = averages ? averages.filter(item => scoreToTier(Number(item.average_score)) === tier).sort((a,b) => b.average_score-a.average_score).flatMap(item => { const line=LINES.find(line=>line.id===item.line_id);return line ? [{line,score:Number(item.average_score)}] : []; }) : LINES.filter(line => rankings?.[line.id] === tier).map(line => ({line,score:undefined})); return <div className="tier-row" key={tier}><div className={`tier-label tier-${index}`}><strong>{tier}</strong></div><div className="tier-content">{lines.length ? lines.map(({line,score})=><LineChip key={line.id} line={line} score={score}/>) : <span className="empty-tier">{empty}</span>}</div></div>; })}</div>;
+}

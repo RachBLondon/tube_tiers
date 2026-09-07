@@ -1,0 +1,11 @@
+import Link from 'next/link';
+import { TierBoard } from '@/ui/tier-board';
+import { getCommunity } from '@/data/rankings';
+import { LINES, scoreToTier } from '@/core/rankings';
+export const dynamic='force-dynamic';
+export default async function Home() {
+  const {averages,total,error}=await getCommunity();
+  const favourite=averages[0];
+  const topName=LINES.find(line=>line.id===favourite?.line_id)?.name;
+  return <div className="page"><div className="eyebrow">THE LONDON TRANSPORT TIER LIST</div><section className="page-heading"><div><h1>Every line.<br/><span>Everyone’s opinion.</span></h1><p>From the daily commute to the last train home.<br/>Where does London’s transport really belong?</p></div><Link className="button primary" href="/rank">Make your ranking <span>↗</span></Link></section>{error && <div className="notice error" role="alert">{error}</div>}<section><div className="section-heading"><div><h2>The community verdict <span className="count">{error ? 'Unavailable' : `${total} ${total===1?'submission':'submissions'}`}</span></h2><p>Average ratings from everyone who’s weighed in.</p></div><span className="small-note">A* is best · F is worst</span></div>{total>0 && <div className="stats"><div className="stat"><strong>{topName}</strong><span>Community favourite{favourite ? ` · ${scoreToTier(Number(favourite.average_score))} tier` : ''}</span></div><div className="stat"><strong>{total}</strong><span>Opinions and counting</span></div><div className="stat"><strong>19</strong><span>Services in the mix</span></div></div>}<TierBoard averages={averages} empty={error?'Rankings unavailable':total?'No lines in this tier yet':'Be the first to put a line here'}/><div className="board-foot"><span>19 services. 7 tiers. No wrong answers (probably).</span><span>Every vote counts equally.</span></div><details className="method"><summary>How the averages work</summary><p>Each tier gets a score: A* = 6, A = 5, B = 4, C = 3, D = 2, E = 1 and F = 0. We average every submitted vote for each service and put it in the nearest tier. Exact halfway scores go to the lower tier. Hover over a logo to see its average out of 6; higher is better. Updating your list replaces your previous vote. Averages refresh when you visit or reload this page.</p></details></section></div>;
+}

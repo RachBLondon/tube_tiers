@@ -1,0 +1,2 @@
+-- Intentionally empty: community totals start at zero, with no invented votes.
+-- RLS tests insert transactional fixtures that roll back after the tests.
