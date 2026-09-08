@@ -1,6 +1,36 @@
 {
-  "name": "tube-tiers", "version": "0.1.0", "private": true,
-  "scripts": {"dev":"next dev --port 3100", "build":"next build", "start":"next start --port 3100", "lint":"eslint", "test":"vitest run", "typecheck":"tsc --noEmit", "db:start":"supabase start", "db:reset":"supabase db reset", "db:types":"supabase gen types typescript --local > src/db/types.ts", "test:db":"supabase test db"},
-  "dependencies": {"@supabase/ssr":"^0.12.5", "@supabase/supabase-js":"^2.112.4", "next":"16.3.1", "react":"19.2.8", "react-dom":"19.2.8", "server-only":"^0.0.1"},
-  "devDependencies": {"@types/node":"^20", "@types/react":"^19", "@types/react-dom":"^19", "typescript":"^5", "eslint":"^9", "eslint-config-next":"16.3.1", "vitest":"^4.1.11", "supabase":"^2.115.0"}
+  "name": "tube-tiers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3100",
+    "build": "next build",
+    "start": "next start --port 3100",
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > src/db/types.ts",
+    "test:db": "supabase test db"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
+    "@vercel/analytics": "^2.0.1",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.1",
+    "supabase": "^2.115.0",
+    "typescript": "^5",
+    "vitest": "^4.1.11"
+  }
 }
