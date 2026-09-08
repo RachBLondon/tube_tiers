@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Tube Tiers</title>
+  <circle cx="32" cy="32" r="23" fill="white" stroke="#e52b32" stroke-width="10"/>
+  <path fill="#080f96" d="M2 24h60v16H2z"/>
+</svg>

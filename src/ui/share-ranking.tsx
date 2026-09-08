@@ -30,7 +30,7 @@ export function ShareRankingButton({ranking}: {ranking: ShareRanking}) {
   function close(){active.current++;dialog.current?.close();if(imageUrl.current)URL.revokeObjectURL(imageUrl.current);imageUrl.current=null;setPreview(null);setFile(null);setError('');setSharing(false);}
   async function open(){
     const request=++active.current;
-    const params=new URLSearchParams({text:'My London transport tier list 🚇 You know these lines are the best. Who’s with me?',url:new URL(`/submissions/${ranking.id}`,window.location.origin).href});
+    const params=new URLSearchParams({text:'My London transport tier list 🚇 You know these lines are the best. Who’s with me? #TubeTiers',url:new URL(`/submissions/${ranking.id}`,window.location.origin).href});
     setPostUrl(`https://twitter.com/intent/tweet?${params.toString()}`);
     setError('');setRetry(false);setPreview(null);setFile(null);
     if(imageUrl.current)URL.revokeObjectURL(imageUrl.current);imageUrl.current=null;
